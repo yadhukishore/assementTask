@@ -1,4 +1,3 @@
-// src/state/auth.js
 import { atom, selector } from "recoil";
 
 export const authState = atom({

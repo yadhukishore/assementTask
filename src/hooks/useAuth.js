@@ -1,4 +1,3 @@
-// src/hooks/useAuth.js
 import { useEffect } from 'react';
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { authState } from '../components/auth/state/auth';
@@ -21,12 +20,10 @@ export const useAuth = () => {
         isAuthenticated: true,
       });
       
-      // If we're on the login page but already authenticated, redirect to home
       if (location.pathname === '/login') {
         navigate('/', { replace: true });
       }
     } else if (!token && location.pathname !== '/login') {
-      // If not authenticated and not on login page, redirect to login
       navigate('/login', { replace: true });
     }
   }, [setAuth, navigate, location.pathname]);

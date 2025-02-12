@@ -1,23 +1,76 @@
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthActions } from "../../services/authService";
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from "../../hooks/useAuth";
+import { useEmployees } from "../../hooks/useEmployees";
+import EmployeeTable from "./EmployeeTable";
 
 const Home = () => {
   const navigate = useNavigate();
   const { logoutUser } = useAuthActions();
   const { isAuthenticated } = useAuth();
 
+  const [page, setPage] = useState(1);
+  const { data, error } = useEmployees(page);
+
+  const employees = data?.data || [];
+  const totalEmployees = data?.total || 0;
+  const totalPages = Math.ceil(totalEmployees / 10);
+
+  if (error) return <p className="text-red-500">Error fetching employees: {error.message}</p>;
+  if (!employees?.length) return <p className="text-blue-500">Loading...</p>;
+
   return (
-    <div className="flex flex-col justify-center items-center h-screen">
-      <h1 className="text-3xl text-green-600">Home Page</h1>
-      {isAuthenticated ? (
-        <button onClick={logoutUser} className="mt-4 bg-red-500 text-white px-4 py-2 rounded">
-          Logout
-        </button>
-      ) : (
-        <button onClick={() => navigate("/login")} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-          Login
-        </button>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header Section */}
+      <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Employee Management</h1>
+        {isAuthenticated && (
+          <button
+            onClick={logoutUser}
+            className="bg-red-500 px-4 py-2 rounded text-white"
+          >
+            Logout
+          </button>
+        )}
+      </header>
+
+      {/* Employee Table */}
+      <div className="container mx-auto mt-6 p-4 bg-white rounded shadow">
+        <h2 className="text-xl font-bold mb-4">Employee List</h2>
+        <EmployeeTable employees={employees} navigate={navigate} />
+
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center mt-4">
+          <button
+            className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </button>
+          <span className="text-lg font-medium">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
+            onClick={() => setPage((prev) => (prev < totalPages ? prev + 1 : prev))}
+            disabled={page >= totalPages}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      {!isAuthenticated && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Login
+          </button>
+        </div>
       )}
     </div>
   );
