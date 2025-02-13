@@ -17,7 +17,7 @@ const Body = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="min-h-screen">
       <LoginForm onLogin={handleLogin} />
     </div>
   );
