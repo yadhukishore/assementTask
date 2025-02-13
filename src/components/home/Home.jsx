@@ -4,11 +4,12 @@ import { useAuthActions } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 import { useEmployees } from "../../hooks/useEmployees";
 import EmployeeTable from "./EmployeeTable";
+import Header from "./header/Header";
 
 const Home = () => {
   const navigate = useNavigate();
   const { logoutUser } = useAuthActions();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated,user } = useAuth();
 
   const [page, setPage] = useState(1);
   const { data, error } = useEmployees(page);
@@ -23,17 +24,13 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header Section */}
-      <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Employee Management</h1>
-        {isAuthenticated && (
-          <button
-            onClick={logoutUser}
-            className="bg-red-500 px-4 py-2 rounded text-white"
-          >
-            Logout
-          </button>
-        )}
-      </header>
+      <Header
+        title="Employee Management"
+        isAuthenticated={isAuthenticated}
+        onLogout={logoutUser}
+        userEmail={user?.email}
+      />
+
 
       {/* Employee Table */}
       <div className="container mx-auto mt-6 p-4 bg-white rounded shadow">
