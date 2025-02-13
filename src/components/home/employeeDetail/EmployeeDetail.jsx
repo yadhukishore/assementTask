@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEmployeeDetails } from "../../../hooks/useEmployees";
+import { getGenderLabel } from "../../../utils/genderMapping";
 
 const EmployeeDetails = () => {
   const { id } = useParams();
@@ -30,7 +31,7 @@ const EmployeeDetails = () => {
         <p><strong>Name:</strong> {employee.name}</p>
         <p><strong>Email:</strong> {employee.email}</p>
         <p><strong>Phone:</strong> {employee.phone}</p>
-        <p><strong>Gender:</strong> {employee.gender}</p>
+        <p><strong>Gender:</strong> {getGenderLabel(employee.gender)}</p>
         <p><strong>Date of Birth:</strong> {employee.date_of_birth}</p>
         <p><strong>Address:</strong> {employee.address}</p>
         <p><strong>City:</strong> {employee.city}</p>
