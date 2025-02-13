@@ -13,13 +13,14 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/login" element={<Body />} />
-      <Route path="/" element={<PrivateRoute element={<Home />} />} />
+      <Route path="/" element={<PrivateRoute element={<Home />} />}>
+        <Route path="page/:page" element={<PrivateRoute element={<Home />} />} />
+      </Route>
       <Route path="/employee/:id" element={<PrivateRoute element={<EmployeeDetails />} />} />
       <Route path="/employee/edit/:id" element={<PrivateRoute element={<EditEmployee />} />} />
     </Routes>
   );
 };
-
 
 function App() {
   return (
