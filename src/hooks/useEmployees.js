@@ -6,11 +6,11 @@ export const useEmployees = (page, sortOrder, sortBy, pageSize = 10) => {
     [`employees`, { page, sortOrder, sortBy, pageSize }],
     () => employeeService.getEmployees({ page, sortOrder, sortBy, pageSize }),
     {
-      keepPreviousData: true, // Keep showing previous data while loading new data
+      keepPreviousData: true, 
       revalidateOnFocus: false, // Don't revalidate when window regains focus
-      revalidateOnReconnect: true, // Revalidate when internet reconnects
+      revalidateOnReconnect: true,
       errorRetryCount: 3, // Retry failed requests 3 times
-      dedupingInterval: 5000, // Dedupe requests within 5 seconds
+      dedupingInterval: 5000, 
     }
   );
 
@@ -26,7 +26,7 @@ export const useEmployees = (page, sortOrder, sortBy, pageSize = 10) => {
 
 export const useEmployeeDetails = (id) => {
   const { data, error, isLoading, mutate } = useSWR(
-    id ? [`employee`, id] : null, // Only fetch if ID exists
+    id ? [`employee`, id] : null, 
     () => employeeService.getEmployeeById(id),
     {
       revalidateOnFocus: false,

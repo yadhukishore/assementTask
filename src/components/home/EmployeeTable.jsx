@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   useReactTable,
   getCoreRowModel,
@@ -6,7 +7,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 
-const EmployeeTable = ({ employees, navigate }) => {
+const EmployeeTable = ({ employees }) => {
   const columns = [
     { accessorKey: "employee_code", header: "Employee ID" },
     { accessorKey: "name", header: "Name" },
@@ -17,12 +18,12 @@ const EmployeeTable = ({ employees, navigate }) => {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <button
-          onClick={() => navigate(`/employee/${row.original.id}`)}
-          className="bg-blue-500 text-white px-3 py-1 rounded"
+        <Link
+          to={`/employee/${row.original.id}`}
+          className="inline-block bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
         >
           View Details
-        </button>
+        </Link>
       ),
     },
   ];

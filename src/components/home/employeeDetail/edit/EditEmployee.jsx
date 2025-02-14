@@ -110,7 +110,7 @@ const EditEmployee = () => {
 
       const formDataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
-        if (formData[key]) { // Only append if value exists
+        if (formData[key]) { 
           formDataToSend.append(key, formData[key]);
         }
       });
@@ -126,11 +126,7 @@ const EditEmployee = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      // Optimistically update the cache
       await mutate({ ...employee, ...formData }, false);
-      
-      // Then revalidate to make sure our optimistic update was correct
       await mutate();
       
       navigate(`/employee/${id}`);
