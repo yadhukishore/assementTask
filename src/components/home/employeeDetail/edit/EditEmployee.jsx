@@ -3,15 +3,22 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEmployeeDetails } from "../../../../hooks/useEmployees";
 import EditEmployeeForm from "./FormEdit";
+import Header from "../../header/Header";
+import { useAuth } from "../../../../hooks/useAuth";
+import { useAuthActions } from "../../../../services/authService";
 
 const EMPLOYEE_UPDATE_API = "https://core-skill-test.webc.in/employee-portal/api/v1/employee/update";
 
 const EditEmployee = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: employee, error, isLoading, mutate } = useEmployeeDetails(id);
+  const { employee, isLoading, error, mutate } = useEmployeeDetails(id);
   const [formData, setFormData] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  const { logoutUser } = useAuthActions();
 
   useEffect(() => {
     if (employee) {
@@ -39,54 +46,121 @@ const EditEmployee = () => {
     }
   }, [employee]);
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header
+          title="Employee Management"
+          isAuthenticated={isAuthenticated}
+          onLogout={logoutUser}
+          userEmail={user?.email}
+        />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header
+          title="Employee Management"
+          isAuthenticated={isAuthenticated}
+          onLogout={logoutUser}
+          userEmail={user?.email}
+        />
+        <div className="container mx-auto p-6">
+          <div className="bg-red-50 p-4 rounded-lg text-red-500 text-center">
+            <h3 className="font-bold">Error loading employee details</h3>
+            <p>{error.message}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleFileChange = (e) => {
-    setProfilePicture(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file && file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert("File size should not exceed 5MB");
+      e.target.value = null;
+      return;
+    }
+    setProfilePicture(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError(null);
+    setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("No authentication token found");
 
       const formDataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
-        formDataToSend.append(key, formData[key]);
+        if (formData[key]) { // Only append if value exists
+          formDataToSend.append(key, formData[key]);
+        }
       });
       formDataToSend.append("id", id);
+      
       if (profilePicture) {
         formDataToSend.append("profile_picture", profilePicture);
       }
 
-      await axios.post(EMPLOYEE_UPDATE_API, formDataToSend, {
+      const response = await axios.post(EMPLOYEE_UPDATE_API, formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
 
-      mutate({ ...employee, ...formData });
+      // Optimistically update the cache
+      await mutate({ ...employee, ...formData }, false);
+      
+      // Then revalidate to make sure our optimistic update was correct
+      await mutate();
+      
       navigate(`/employee/${id}`);
     } catch (err) {
-      console.error("Update error:", err.response?.data || err.message);
+      setSubmitError(err.response?.data?.message || err.message);
+      console.error("Update error:", err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <EditEmployeeForm
-      formData={formData}
-      onChange={handleChange}
-      onFileChange={handleFileChange}
-      onSubmit={handleSubmit}
-      onCancel={() => navigate(-1)}
-    />
+    <div className="min-h-screen bg-gray-100">
+      <Header
+        title="Employee Management"
+        isAuthenticated={isAuthenticated}
+        onLogout={logoutUser}
+        userEmail={user?.email}
+      />
+      <EditEmployeeForm
+        formData={formData}
+        onChange={handleChange}
+        onFileChange={handleFileChange}
+        onSubmit={handleSubmit}
+        onCancel={() => navigate(-1)}
+        isSubmitting={isSubmitting}
+        submitError={submitError}
+        currentImage={employee?.profile_picture}
+      />
+    </div>
   );
 };
 

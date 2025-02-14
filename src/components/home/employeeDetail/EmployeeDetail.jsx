@@ -9,13 +9,62 @@ import { useAuthActions } from "../../../services/authService";
 const EmployeeDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: employee, error, isLoading } = useEmployeeDetails(id);
+  const { employee, isLoading, error } = useEmployeeDetails(id);
   const { isAuthenticated, user } = useAuth();
   const { logoutUser } = useAuthActions();
 
-  if (isLoading) return <p className="text-blue-500 text-center mt-8">Loading...</p>;
-  if (error) return <p className="text-red-500 text-center mt-8">Error fetching details: {error.message}</p>;
-  if (!employee) return <p className="text-gray-500 text-center mt-8">No employee found.</p>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header
+          title="Employee Management"
+          isAuthenticated={isAuthenticated}
+          onLogout={logoutUser}
+          userEmail={user?.email}
+        />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header
+          title="Employee Management"
+          isAuthenticated={isAuthenticated}
+          onLogout={logoutUser}
+          userEmail={user?.email}
+        />
+        <div className="container mx-auto p-6">
+          <div className="bg-red-50 p-4 rounded-lg text-red-500 text-center">
+            <h3 className="font-bold">Error loading employee details</h3>
+            <p>{error.message}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!employee) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header
+          title="Employee Management"
+          isAuthenticated={isAuthenticated}
+          onLogout={logoutUser}
+          userEmail={user?.email}
+        />
+        <div className="container mx-auto p-6">
+          <div className="bg-yellow-50 p-4 rounded-lg text-yellow-700 text-center">
+            No employee found.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -84,7 +133,7 @@ const EmployeeDetails = () => {
 const DetailItem = ({ label, value }) => (
   <div className="bg-gray-50 p-4 rounded-lg">
     <p className="text-sm font-semibold text-gray-600">{label}</p>
-    <p className="text-lg font-medium text-gray-800">{value}</p>
+    <p className="text-lg font-medium text-gray-800">{value || "N/A"}</p>
   </div>
 );
 
