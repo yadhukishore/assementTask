@@ -1,9 +1,9 @@
 import React from "react";
+import { Form, Input, Select } from "informed";
 import { genderOptions } from "../../../../utils/genderMapping";
 
 const EditEmployeeForm = ({
   formData,
-  onChange,
   onFileChange,
   onSubmit,
   onCancel,
@@ -11,6 +11,37 @@ const EditEmployeeForm = ({
   submitError,
   currentImage
 }) => {
+  const handleSubmit = async ({ values }) => {
+    const formattedData = {
+      id: formData.id,
+      name: values.name || formData.name,
+      email: values.email || formData.email,
+      phone: values.phone || formData.phone,
+      gender: values.gender || formData.gender,
+      date_of_birth: values.date_of_birth || formData.date_of_birth,
+      employee_code: values.employee_code || formData.employee_code,
+      salary: values.salary || formData.salary,
+      address: values.address || formData.address,
+      city: values.city || formData.city,
+      state: values.state || formData.state,
+      zip_code: values.zip_code || formData.zip_code,
+      country: values.country || formData.country,
+      bank_account_number: values.bank_account_number || formData.bank_account_number,
+      ifsc_code: values.ifsc_code || formData.ifsc_code,
+      designation_id: values.designation_id || formData.designation_id,
+      department_id: values.department_id || formData.department_id,
+      employment_type_id: values.employment_type_id || formData.employment_type_id,
+      joining_date: values.joining_date || formData.joining_date,
+      emergency_contact: values.emergency_contact || formData.emergency_contact
+    };
+    
+    const cleanedData = Object.fromEntries(
+      Object.entries(formattedData).filter(([_, value]) => value != null)
+    );
+
+    onSubmit(cleanedData);
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
@@ -22,8 +53,11 @@ const EditEmployeeForm = ({
           </div>
         )}
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          {/* Profile Picture Section */}
+        <Form 
+          onSubmit={handleSubmit} 
+          initialValues={formData}
+          className="space-y-4"
+        >
           <div className="mb-6">
             {currentImage && (
               <div className="mb-4">
@@ -41,49 +75,21 @@ const EditEmployeeForm = ({
                 type="file"
                 accept="image/*"
                 onChange={onFileChange}
-                className="mt-1 block w-full text-sm text-gray-500
-                          file:mr-4 file:py-2 file:px-4
-                          file:rounded-full file:border-0
-                          file:text-sm file:font-semibold
-                          file:bg-blue-50 file:text-blue-700
-                          hover:file:bg-blue-100"
+                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
             </label>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Basic Information */}
             <div className="space-y-4">
-              <FormField
-                label="Name"
-                name="name"
-                value={formData.name}
-                onChange={onChange}
-                required
-              />
-              <FormField
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={onChange}
-                required
-              />
-              <FormField
-                label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={onChange}
-                required
-              />
+              <FormField label="Name" name="name" />
+              <FormField label="Email" name="email" type="email" />
+              <FormField label="Phone" name="phone" />
               <label className="block">
                 <span className="text-gray-700">Gender</span>
-                <select
+                <Select
                   name="gender"
-                  value={formData.gender}
-                  onChange={onChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  required
                 >
                   <option value="">Select Gender</option>
                   {genderOptions.map(option => (
@@ -91,90 +97,33 @@ const EditEmployeeForm = ({
                       {option.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </div>
 
-            {/* Additional Fields */}
             <div className="space-y-4">
-              <FormField
-                label="Date of Birth"
-                name="date_of_birth"
-                type="date"
-                value={formData.date_of_birth}
-                onChange={onChange}
-              />
-              <FormField
-                label="Employee Code"
-                name="employee_code"
-                value={formData.employee_code}
-                onChange={onChange}
-                required
-              />
-              <FormField
-                label="Salary"
-                name="salary"
-                type="number"
-                value={formData.salary}
-                onChange={onChange}
-                required
-              />
+              <FormField label="Date of Birth" name="date_of_birth" type="date" />
+              <FormField label="Employee Code" name="employee_code" />
+              <FormField label="Salary" name="salary" type="number" />
             </div>
           </div>
 
-          {/* Address Information */}
           <div className="space-y-4 mt-6">
             <h3 className="text-lg font-semibold text-gray-700">Address Information</h3>
-            <FormField
-              label="Address"
-              name="address"
-              value={formData.address}
-              onChange={onChange}
-            />
+            <FormField label="Address" name="address" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                label="City"
-                name="city"
-                value={formData.city}
-                onChange={onChange}
-              />
-              <FormField
-                label="State"
-                name="state"
-                value={formData.state}
-                onChange={onChange}
-              />
-              <FormField
-                label="Zip Code"
-                name="zip_code"
-                value={formData.zip_code}
-                onChange={onChange}
-              />
-              <FormField
-                label="Country"
-                name="country"
-                value={formData.country}
-                onChange={onChange}
-              />
+              <FormField label="City" name="city" />
+              <FormField label="State" name="state" />
+              <FormField label="Zip Code" name="zip_code" />
+              <FormField label="Country" name="country" />
             </div>
           </div>
 
-          {/* Bank Information */}
           <div className="space-y-4 mt-6">
             <h3 className="text-lg font-semibold text-gray-700">Bank Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                label="Bank Account Number"
-                name="bank_account_number"
-                value={formData.bank_account_number}
-                onChange={onChange}
-              />
-              <FormField
-                label="IFSC Code"
-                name="ifsc_code"
-                value={formData.ifsc_code}
-                onChange={onChange}
-              />
+              <FormField label="Bank Account Number" name="bank_account_number" />
+              <FormField label="IFSC Code" name="ifsc_code" />
             </div>
           </div>
 
@@ -195,20 +144,18 @@ const EditEmployeeForm = ({
               {isSubmitting ? "Saving...." : "Save Changes"}
             </button>
           </div>
-        </form>
+        </Form>
       </div>
     </div>
   );
 };
-const FormField = ({ label, name, type = "text", value, onChange, required = false }) => (
+
+const FormField = ({ label, name, type = "text" }) => (
   <label className="block">
     <span className="text-gray-700">{label}</span>
-    <input
+    <Input
       type={type}
       name={name}
-      value={value}
-      onChange={onChange}
-      required={required}
       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
     />
   </label>
