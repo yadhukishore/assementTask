@@ -1,7 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuthActions } from "../../services/authService";
-import { showSuccessToast, showErrorToast } from "../../utils/toastMessage";
-import LoginForm from "./LoginForm";
+import { useAuthActions } from "../../../services/authService";
+import { showSuccessToast, showErrorToast } from "../../../utils/toastMessage";
+import LoginForm from "../loginform/LoginForm";
+import { Container, Row, Col } from "react-bootstrap";
+import "./Body.css"; 
 
 const Body = () => {
   const navigate = useNavigate();
@@ -20,9 +22,13 @@ const Body = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <LoginForm onLogin={handleLogin} />
-    </div>
+    <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center login-background">
+      <Row className="w-100">
+        <Col md={6} lg={4} className="mx-auto">
+          <LoginForm onLogin={handleLogin} />
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

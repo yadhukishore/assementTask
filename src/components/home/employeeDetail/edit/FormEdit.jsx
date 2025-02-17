@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, Input, Select } from "informed";
 import { genderOptions } from "../../../../utils/genderMapping";
+import { showErrorToast } from "../../../../utils/toastMessage";
 
 const EditEmployeeForm = ({
   formData,
@@ -12,6 +13,36 @@ const EditEmployeeForm = ({
   currentImage
 }) => {
   const handleSubmit = async ({ values }) => {
+
+    if (!values.phone ) {
+      showErrorToast("Please enter phone number.");
+      return;
+    }
+    else if (!values.name) {
+      showErrorToast("Please add name.");
+      return;
+    }
+    else if(!values.email) {
+      showErrorToast("Please add email.");
+      return;
+    }
+    else if (!values.date_of_birth) {
+      showErrorToast("Please add date of birth.");
+      return;
+    }
+    else if (!values.zip_code) {
+      showErrorToast("Please zip code.");
+      return;
+    }
+    else if (!values.bank_account_number) {
+      showErrorToast("Please add bank account number.");
+      return;
+    }
+    else if (!values.ifsc_code) {
+      showErrorToast("Please add ifsc code.");
+      return;
+    }
+    
     const formattedData = {
       id: formData.id,
       name: values.name || formData.name,
@@ -55,6 +86,7 @@ const EditEmployeeForm = ({
 
         <Form 
           onSubmit={handleSubmit} 
+          focusOnInvalid={true}
           initialValues={formData}
           className="space-y-4"
         >
