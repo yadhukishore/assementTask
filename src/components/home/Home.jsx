@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Container, Row, Col, Button, Spinner, Alert } from 'react-bootstrap';
 import { useAuthActions } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 import { useEmployees } from "../../hooks/useEmployees";
-import EmployeeTable from "./EmployeeTable";
+import EmployeeTable from "./employeeTable/EmployeeTable";
 import Header from "./header/Header";
+import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -40,21 +42,22 @@ const Home = () => {
 
   if (error) {
     return (
-      <div className="p-4 text-red-500 bg-red-50 rounded">
-        <h3 className="font-bold">Error loading employees</h3>
+      <Alert variant="danger" className="m-4">
+        <Alert.Heading>Error loading employees</Alert.Heading>
         <p>{error.message}</p>
-        <button 
+        <Button 
+          variant="danger"
           onClick={() => mutate()} 
-          className="mt-2 bg-red-500 text-white px-4 py-2 rounded"
+          className="mt-2"
         >
           Retry
-        </button>
-      </div>
+        </Button>
+      </Alert>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="home-wrapper">
       <Header
         title="Employee Management"
         isAuthenticated={isAuthenticated}
@@ -62,62 +65,70 @@ const Home = () => {
         userEmail={user?.email}
       />
 
-      <div className="container mx-auto mt-6 p-4 bg-white rounded shadow">
-        <h2 className="text-xl font-bold mb-4">Employee List</h2>
-        
-        {isLoading && !employees.length ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
-        ) : (
-          <>
-            <EmployeeTable 
-              employees={employees} 
-              navigate={navigate}
-              onSort={handleSort}
-              currentSortBy={sortBy}
-              currentSortOrder={sortOrder}
-            />
+      <Container className="main-content mt-4">
+        <Row>
+          <Col>
+            <div className="content-card">
+              <h2 className="mb-4">Employee List</h2>
+              
+              {isLoading && !employees.length ? (
+                <div className="loading-spinner">
+                  <Spinner animation="border" variant="primary" />
+                </div>
+              ) : (
+                <>
+                  <EmployeeTable 
+                    employees={employees} 
+                    navigate={navigate}
+                    onSort={handleSort}
+                    currentSortBy={sortBy}
+                    currentSortOrder={sortOrder}
+                  />
 
-            {isValidating && (
-              <div className="text-center text-gray-500 my-2">
-                Refreshing data...
-              </div>
-            )}
+                  {isValidating && (
+                    <div className="text-center text-muted my-2">
+                      Refreshing data...
+                    </div>
+                  )}
 
-            <div className="flex justify-between items-center mt-4">
-              <button
-                className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-400 transition-colors"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1 || isValidating}
-              >
-                Previous
-              </button>
-              <span className="text-lg font-medium">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-400 transition-colors"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages || isValidating}
-              >
-                Next
-              </button>
+                  <div className="pagination-controls">
+                    <Button
+                      variant="secondary"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || isValidating}
+                    >
+                      Previous
+                    </Button>
+                    <span className="page-info">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="secondary"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= totalPages || isValidating}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
-          </>
-        )}
-      </div>
+          </Col>
+        </Row>
 
-      {!isAuthenticated && (
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={() => navigate("/login")}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-          >
-            Login
-          </button>
-        </div>
-      )}
+        {!isAuthenticated && (
+          <Row className="mt-4">
+            <Col className="text-center">
+              <Button
+                variant="primary"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+            </Col>
+          </Row>
+        )}
+      </Container>
     </div>
   );
 };
