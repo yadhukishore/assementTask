@@ -6,6 +6,8 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 import { useAuth } from './hooks/useAuth';
 import EmployeeDetails from "./components/home/employeeDetail/EmployeeDetail";
 import EditEmployee from "./components/home/employeeDetail/edit/EditEmployee";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AppContent = () => {
   useAuth(); 
@@ -27,6 +29,7 @@ function App() {
     <RecoilRoot>
       <Router>
         <AppContent />
+        <ToastContainer />
       </Router>
     </RecoilRoot>
   );
