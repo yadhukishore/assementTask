@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container, Spinner, Alert } from 'react-bootstrap';
 import axios from "axios";
 import { useEmployeeDetails } from "../../../../hooks/useEmployees";
-import EditEmployeeForm from "./FormEdit";
+import EditEmployeeForm from "./formEdit/FormEdit";
 import Header from "../../header/Header";
 import { useAuth } from "../../../../hooks/useAuth";
 import { useAuthActions } from "../../../../services/authService";
