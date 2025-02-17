@@ -1,7 +1,19 @@
 import React from "react";
-import { Form, Input, Select } from "informed";
+import { Form as InformedForm, Input, Select } from "informed";
+import { Container, Row, Col, Form, Button, Card, Alert, Image } from 'react-bootstrap';
 import { genderOptions } from "../../../../utils/genderMapping";
 import { showErrorToast } from "../../../../utils/toastMessage";
+
+const FormField = ({ label, name, type = "text" }) => (
+  <Form.Group className="mb-3">
+    <Form.Label>{label}</Form.Label>
+    <Input
+      type={type}
+      name={name}
+      className="form-control"
+    />
+  </Form.Group>
+);
 
 const EditEmployeeForm = ({
   formData,
@@ -13,8 +25,7 @@ const EditEmployeeForm = ({
   currentImage
 }) => {
   const handleSubmit = async ({ values }) => {
-
-    if (!values.phone ) {
+    if (!values.phone) {
       showErrorToast("Please enter phone number.");
       return;
     }
@@ -74,123 +85,121 @@ const EditEmployeeForm = ({
   };
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Edit Employee</h2>
-        
-        {submitError && (
-          <div className="mb-4 p-4 bg-red-50 text-red-500 rounded-lg">
-            {submitError}
-          </div>
-        )}
+    <Container className="py-4">
+      <Card className="mx-auto" style={{ maxWidth: '768px' }}>
+        <Card.Body className="p-4">
+          <h2 className="mb-4 fw-bold">Edit Employee</h2>
+          
+          {submitError && (
+            <Alert variant="danger" className="mb-4">
+              {submitError}
+            </Alert>
+          )}
 
-        <Form 
-          onSubmit={handleSubmit} 
-          focusOnInvalid={true}
-          initialValues={formData}
-          className="space-y-4"
-        >
-          <div className="mb-6">
-            {currentImage && (
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">Current Profile Picture:</p>
-                <img
-                  src={currentImage}
-                  alt="Current profile"
-                  className="w-32 h-32 object-cover rounded-lg"
+          <InformedForm 
+            onSubmit={handleSubmit} 
+            focusOnInvalid={true}
+            initialValues={formData}
+          >
+            <div className="mb-4">
+              {currentImage && (
+                <div className="mb-3">
+                  <Form.Label className="text-muted mb-2">Current Profile Picture:</Form.Label>
+                  <Image
+                    src={currentImage}
+                    alt="Current profile"
+                    style={{ width: '128px', height: '128px', objectFit: 'cover' }}
+                    className="rounded"
+                  />
+                </div>
+              )}
+              <Form.Group>
+                <Form.Label>Update Profile Picture:</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={onFileChange}
+                  size="sm"
                 />
-              </div>
-            )}
-            <label className="block">
-              <span className="text-gray-700">Update Profile Picture:</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
-                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <FormField label="Name" name="name" />
-              <FormField label="Email" name="email" type="email" />
-              <FormField label="Phone" name="phone" />
-              <label className="block">
-                <span className="text-gray-700">Gender</span>
-                <Select
-                  name="gender"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                >
-                  <option value="">Select Gender</option>
-                  {genderOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </label>
+              </Form.Group>
             </div>
 
-            <div className="space-y-4">
-              <FormField label="Date of Birth" name="date_of_birth" type="date" />
-              <FormField label="Employee Code" name="employee_code" />
-              <FormField label="Salary" name="salary" type="number" />
-            </div>
-          </div>
+            <Row>
+              <Col md={6}>
+                <FormField label="Name" name="name" />
+                <FormField label="Email" name="email" type="email" />
+                <FormField label="Phone" name="phone" />
+                <Form.Group className="mb-3">
+                  <Form.Label>Gender</Form.Label>
+                  <Select
+                    name="gender"
+                    className="form-select"
+                  >
+                    <option value="">Select Gender</option>
+                    {genderOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </Form.Group>
+              </Col>
 
-          <div className="space-y-4 mt-6">
-            <h3 className="text-lg font-semibold text-gray-700">Address Information</h3>
-            <FormField label="Address" name="address" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField label="City" name="city" />
-              <FormField label="State" name="state" />
-              <FormField label="Zip Code" name="zip_code" />
-              <FormField label="Country" name="country" />
-            </div>
-          </div>
+              <Col md={6}>
+                <FormField label="Date of Birth" name="date_of_birth" type="date" />
+                <FormField label="Employee Code" name="employee_code" />
+                <FormField label="Salary" name="salary" type="number" />
+              </Col>
+            </Row>
 
-          <div className="space-y-4 mt-6">
-            <h3 className="text-lg font-semibold text-gray-700">Bank Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField label="Bank Account Number" name="bank_account_number" />
-              <FormField label="IFSC Code" name="ifsc_code" />
+            <div className="mt-4">
+              <h3 className="h5 mb-3">Address Information</h3>
+              <FormField label="Address" name="address" />
+              <Row>
+                <Col md={6}>
+                  <FormField label="City" name="city" />
+                  <FormField label="State" name="state" />
+                </Col>
+                <Col md={6}>
+                  <FormField label="Zip Code" name="zip_code" />
+                  <FormField label="Country" name="country" />
+                </Col>
+              </Row>
             </div>
-          </div>
 
-          <div className="flex justify-end space-x-4 mt-6">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition-colors"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Saving...." : "Save Changes"}
-            </button>
-          </div>
-        </Form>
-      </div>
-    </div>
+            <div className="mt-4">
+              <h3 className="h5 mb-3">Bank Information</h3>
+              <Row>
+                <Col md={6}>
+                  <FormField label="Bank Account Number" name="bank_account_number" />
+                </Col>
+                <Col md={6}>
+                  <FormField label="IFSC Code" name="ifsc_code" />
+                </Col>
+              </Row>
+            </div>
+
+            <div className="d-flex justify-content-end gap-2 mt-4">
+              <Button
+                variant="light"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Saving...." : "Save Changes"}
+              </Button>
+            </div>
+          </InformedForm>
+        </Card.Body>
+      </Card>
+    </Container>
   );
 };
-
-const FormField = ({ label, name, type = "text" }) => (
-  <label className="block">
-    <span className="text-gray-700">{label}</span>
-    <Input
-      type={type}
-      name={name}
-      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-    />
-  </label>
-);
 
 export default EditEmployeeForm;

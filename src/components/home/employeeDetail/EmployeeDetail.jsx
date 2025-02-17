@@ -1,10 +1,20 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Container, Row, Col, Card, Button, Spinner, Alert, Image } from 'react-bootstrap';
 import { useEmployeeDetails } from "../../../hooks/useEmployees";
 import { getGenderLabel } from "../../../utils/genderMapping";
 import Header from "../header/Header";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAuthActions } from "../../../services/authService";
+
+const DetailItem = ({ label, value }) => (
+  <Card className="h-100">
+    <Card.Body className="p-3">
+      <Card.Subtitle className="mb-1 text-muted">{label}</Card.Subtitle>
+      <Card.Text className="fs-5">{value || "N/A"}</Card.Text>
+    </Card.Body>
+  </Card>
+);
 
 const EmployeeDetails = () => {
   const { id } = useParams();
@@ -13,128 +23,152 @@ const EmployeeDetails = () => {
   const { isAuthenticated, user } = useAuth();
   const { logoutUser } = useAuthActions();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header
-          title="Employee Management"
-          isAuthenticated={isAuthenticated}
-          onLogout={logoutUser}
-          userEmail={user?.email}
-        />
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
+          <Spinner animation="border" variant="primary" />
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header
-          title="Employee Management"
-          isAuthenticated={isAuthenticated}
-          onLogout={logoutUser}
-          userEmail={user?.email}
-        />
-        <div className="container mx-auto p-6">
-          <div className="bg-red-50 p-4 rounded-lg text-red-500 text-center">
-            <h3 className="font-bold">Error loading employee details</h3>
-            <p>{error.message}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    if (error) {
+      return (
+        <Alert variant="danger" className="text-center">
+          <Alert.Heading>Error loading employee details</Alert.Heading>
+          <p>{error.message}</p>
+        </Alert>
+      );
+    }
 
-  if (!employee) {
+    if (!employee) {
+      return (
+        <Alert variant="warning" className="text-center">
+          No employee found.
+        </Alert>
+      );
+    }
+
     return (
-      <div className="min-h-screen bg-gray-100">
-        <Header
-          title="Employee Management"
-          isAuthenticated={isAuthenticated}
-          onLogout={logoutUser}
-          userEmail={user?.email}
-        />
-        <div className="container mx-auto p-6">
-          <div className="bg-yellow-50 p-4 rounded-lg text-yellow-700 text-center">
-            No employee found.
+      <Card className="border-0 shadow">
+        <Card.Body className="p-4">
+          <h2 className="text-center mb-4 text-primary fs-2 fw-bold">Employee Details</h2>
+
+          {employee.profile_picture && (
+            <div className="text-center mb-4">
+              <Image
+                src={employee.profile_picture}
+                roundedCircle
+                className="border border-4 border-primary-subtle"
+                style={{ width: '128px', height: '128px', objectFit: 'cover' }}
+              />
+            </div>
+          )}
+
+          <Row className="g-3">
+            <Col md={6}>
+              <DetailItem label="Employee ID" value={employee.employee_code} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Name" value={employee.name} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Email" value={employee.email} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Phone" value={employee.phone} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Gender" value={getGenderLabel(employee.gender)} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Date of Birth" value={employee.date_of_birth} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Address" value={employee.address} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="City" value={employee.city} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="State" value={employee.state} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Zip Code" value={employee.zip_code} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Country" value={employee.country} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Designation" value={employee.designation?.title || "N/A"} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Department" value={employee.department?.name || "N/A"} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Employment Type" value={employee.employment_type?.title || "N/A"} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Joining Date" value={employee.joining_date} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Salary" value={`$${employee.salary}`} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Bank Account Number" value={employee.bank_account_number} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="IFSC Code" value={employee.ifsc_code} />
+            </Col>
+            <Col md={6}>
+              <DetailItem label="Emergency Contact" value={employee.emergency_contact} />
+            </Col>
+            <Col md={6}>
+              <DetailItem 
+                label="Created By" 
+                value={`${employee.created_by?.name || "N/A"} (${employee.formatted_created_at || "N/A"})`} 
+              />
+            </Col>
+            <Col md={6}>
+              <DetailItem 
+                label="Updated By" 
+                value={`${employee.updated_by?.name || "N/A"} (${employee.formatted_updated_at || "N/A"})`} 
+              />
+            </Col>
+          </Row>
+
+          <div className="d-flex justify-content-center gap-3 mt-4">
+            <Button
+              variant="primary"
+              onClick={() => navigate(-1)}
+            >
+              Back to List
+            </Button>
+            <Button
+              variant="success"
+              onClick={() => navigate(`/employee/edit/${id}`)}
+            >
+              Edit
+            </Button>
           </div>
-        </div>
-      </div>
+        </Card.Body>
+      </Card>
     );
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-vh-100 bg-light">
       <Header
         title="Employee Management"
         isAuthenticated={isAuthenticated}
         onLogout={logoutUser}
         userEmail={user?.email}
       />
-      <div className="container mx-auto p-6">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">Employee Details</h2>
-
-          {employee.profile_picture && (
-            <div className="flex justify-center mb-6">
-              <img
-                src={employee.profile_picture}
-                alt="Profile"
-                className="w-32 h-32 rounded-full object-cover border-4 border-blue-200"
-              />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <DetailItem label="Employee ID" value={employee.employee_code} />
-            <DetailItem label="Name" value={employee.name} />
-            <DetailItem label="Email" value={employee.email} />
-            <DetailItem label="Phone" value={employee.phone} />
-            <DetailItem label="Gender" value={getGenderLabel(employee.gender)} />
-            <DetailItem label="Date of Birth" value={employee.date_of_birth} />
-            <DetailItem label="Address" value={employee.address} />
-            <DetailItem label="City" value={employee.city} />
-            <DetailItem label="State" value={employee.state} />
-            <DetailItem label="Zip Code" value={employee.zip_code} />
-            <DetailItem label="Country" value={employee.country} />
-            <DetailItem label="Designation" value={employee.designation?.title || "N/A"} />
-            <DetailItem label="Department" value={employee.department?.name || "N/A"} />
-            <DetailItem label="Employment Type" value={employee.employment_type_id} />
-            <DetailItem label="Joining Date" value={employee.joining_date} />
-            <DetailItem label="Salary" value={`$${employee.salary}`} />
-            <DetailItem label="Bank Account Number" value={employee.bank_account_number} />
-            <DetailItem label="IFSC Code" value={employee.ifsc_code} />
-            <DetailItem label="Emergency Contact" value={employee.emergency_contact} />
-          </div>
-
-          <div className="mt-8 flex justify-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Back to List
-            </button>
-            <button
-              onClick={() => navigate(`/employee/edit/${id}`)}
-              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Edit
-            </button>
-          </div>
-        </div>
-      </div>
+      <Container className="py-4">
+        {renderContent()}
+      </Container>
     </div>
   );
 };
-
-const DetailItem = ({ label, value }) => (
-  <div className="bg-gray-50 p-4 rounded-lg">
-    <p className="text-sm font-semibold text-gray-600">{label}</p>
-    <p className="text-lg font-medium text-gray-800">{value || "N/A"}</p>
-  </div>
-);
 
 export default EmployeeDetails;

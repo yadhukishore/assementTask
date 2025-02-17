@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Container, Spinner, Alert } from 'react-bootstrap';
 import axios from "axios";
 import { useEmployeeDetails } from "../../../../hooks/useEmployees";
 import EditEmployeeForm from "./FormEdit";
@@ -41,10 +42,6 @@ const EditEmployee = () => {
         formDataToSend.append("profile_picture", profilePicture);
       }
 
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
-
       const response = await axios.post(EMPLOYEE_UPDATE_API, formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -75,15 +72,15 @@ const EditEmployee = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-vh-100 bg-light">
         <Header
           title="Employee Management"
           isAuthenticated={isAuthenticated}
           onLogout={logoutUser}
           userEmail={user?.email}
         />
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '256px' }}>
+          <Spinner animation="border" variant="primary" />
         </div>
       </div>
     );
@@ -91,25 +88,25 @@ const EditEmployee = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-vh-100 bg-light">
         <Header
           title="Employee Management"
           isAuthenticated={isAuthenticated}
           onLogout={logoutUser}
           userEmail={user?.email}
         />
-        <div className="container mx-auto p-6">
-          <div className="bg-red-50 p-4 rounded-lg text-red-500 text-center">
-            <h3 className="font-bold">Error loading employee details</h3>
+        <Container className="py-4">
+          <Alert variant="danger" className="text-center">
+            <Alert.Heading>Error loading employee details</Alert.Heading>
             <p>{error.message}</p>
-          </div>
-        </div>
+          </Alert>
+        </Container>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-vh-100 bg-light">
       <Header
         title="Employee Management"
         isAuthenticated={isAuthenticated}
