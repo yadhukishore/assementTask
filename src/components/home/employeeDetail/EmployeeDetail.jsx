@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Spinner, Alert, Image } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Spinner, Alert, Image, Modal } from 'react-bootstrap';
+import axios from "axios";
 import { useEmployeeDetails } from "../../../hooks/useEmployees";
 import { getGenderLabel } from "../../../utils/genderMapping";
 import Header from "../header/Header";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAuthActions } from "../../../services/authService";
+import EditEmployeeForm from "../employeeDetail/edit/formEdit/FormEdit";
+
+const EMPLOYEE_UPDATE_API = "https://core-skill-test.webc.in/employee-portal/api/v1/employee/update";
 
 const DetailItem = ({ label, value }) => (
   <Card className="h-100">
@@ -19,9 +23,66 @@ const DetailItem = ({ label, value }) => (
 const EmployeeDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { employee, isLoading, error } = useEmployeeDetails(id);
+  const { employee, isLoading, error, mutate } = useEmployeeDetails(id);
   const { isAuthenticated, user } = useAuth();
   const { logoutUser } = useAuthActions();
+  
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleFormSubmit = async (formData) => {
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("No authentication token found");
+
+      const formDataToSend = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          formDataToSend.append(key, value);
+        }
+      });
+
+      formDataToSend.append("id", id);
+
+      if (profilePicture) {
+        formDataToSend.append("profile_picture", profilePicture);
+      }
+
+      const response = await axios.post(EMPLOYEE_UPDATE_API, formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      
+      await mutate({ ...employee, ...formData }, false);
+      await mutate();
+
+      setShowEditModal(false); 
+      setProfilePicture(null); 
+    } catch (err) {
+      console.error("Update error:", err);
+      setSubmitError(err.response?.data?.message || err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size > 5 * 1024 * 1024) {
+      alert("File size should not exceed 5MB");
+      e.target.value = null;
+      return;
+    }
+    setProfilePicture(file);
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -146,7 +207,7 @@ const EmployeeDetails = () => {
             </Button>
             <Button
               variant="success"
-              onClick={() => navigate(`/employee/edit/${id}`)}
+              onClick={() => setShowEditModal(true)}
             >
               Edit
             </Button>
@@ -166,6 +227,36 @@ const EmployeeDetails = () => {
       />
       <Container className="py-4">
         {renderContent()}
+
+        {/* Edit Employee Modal */}
+        <Modal 
+          show={showEditModal} 
+          onHide={() => setShowEditModal(false)}
+          size="lg"
+          centered
+          backdrop="static"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Employee</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="p-0">
+            {employee && (
+              <EditEmployeeForm
+                formData={employee}
+                onFileChange={handleFileChange}
+                onSubmit={handleFormSubmit}
+                onCancel={() => {
+                  setShowEditModal(false);
+                  setSubmitError(null);
+                }}
+                isSubmitting={isSubmitting}
+                submitError={submitError}
+                currentImage={employee.profile_picture}
+                isModal={true}
+              />
+            )}
+          </Modal.Body>
+        </Modal>
       </Container>
     </div>
   );

@@ -7,6 +7,7 @@ import FormField from "./FormField";
 import SelectField from "./SelectField";
 import FormSection from "./FormSection";
 import { requiredField, validatePhone, validateJoiningDate } from "./validation";
+import { showErrorToast, showSuccessToast } from "../../../../../utils/toastMessage";
 
 const EditEmployeeForm = ({
   formData,
@@ -15,7 +16,8 @@ const EditEmployeeForm = ({
   onCancel,
   isSubmitting,
   submitError,
-  currentImage
+  currentImage,
+  isModal = false
 }) => {
   const today = new Date().toISOString().split('T')[0];
   
@@ -51,17 +53,32 @@ const EditEmployeeForm = ({
       Object.entries(formattedData).filter(([_, value]) => value != null)
     );
 
-    onSubmit(cleanedData);
+    try {
+      await onSubmit(cleanedData); 
+      showSuccessToast("Employee details updated successfully!");
+    } catch (error) {
+      showErrorToast("Failed to update employee details.");
+      throw error; // Re-throw to let parent component handle
+    }
   };
 
+  // Conditionally apply container styling if not in modal
+  const CardComponent = isModal ? 'div' : Card;
+  const ContainerComponent = isModal ? 'div' : Container;
+  
   return (
-    <Container className="py-4">
-      <Card className="mx-auto shadow-sm" style={{ maxWidth: '768px' }}>
-        <Card.Body className="p-4">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="fw-bold m-0">Edit Employee</h2>
-            <Badge bg="primary" className="px-3 py-2">ID: {formData.id}</Badge>
-          </div>
+    <ContainerComponent className={isModal ? '' : 'py-4'}>
+      <CardComponent 
+        className={isModal ? '' : 'mx-auto shadow-sm'} 
+        style={isModal ? {} : { maxWidth: '768px' }}
+      >
+        <div className={isModal ? 'p-3' : 'p-4'}>
+          {!isModal && (
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="fw-bold m-0">Edit Employee</h2>
+              <Badge bg="primary" className="px-3 py-2">ID: {formData.id}</Badge>
+            </div>
+          )}
           
           {submitError && (
             <Alert variant="danger" className="mb-4">
@@ -77,14 +94,14 @@ const EditEmployeeForm = ({
             validateOn="change"
           >
             {/* Profile Picture Section */}
-            <FormSection title="Profile Picture" icon={<i className="bi bi-person-circle"></i>}>
+            <FormSection title="Profile Picture" icon={<i className="bi bi-person-circle"></i>} isModal={isModal}>
               <div className="mb-4">
                 {currentImage && (
                   <div className="mb-3 text-center">
                     <Image
                       src={currentImage}
                       alt="Current profile"
-                      style={{ width: '128px', height: '128px', objectFit: 'cover' }}
+                      style={{ width: isModal ? '80px' : '128px', height: isModal ? '80px' : '128px', objectFit: 'cover' }}
                       className="rounded-circle border shadow-sm"
                     />
                     <p className="text-muted mt-2 small">Current Profile Picture</p>
@@ -107,7 +124,7 @@ const EditEmployeeForm = ({
             </FormSection>
 
             {/* Personal Information Section */}
-            <FormSection title="Personal Information" icon={<i className="bi bi-person-vcard"></i>}>
+            <FormSection title="Personal Information" icon={<i className="bi bi-person-vcard"></i>} isModal={isModal}>
               <Row>
                 <Col md={6}>
                   <FormField 
@@ -173,7 +190,7 @@ const EditEmployeeForm = ({
             </FormSection>
 
             {/* Department Information Section */}
-            <FormSection title="Department Information" icon={<i className="bi bi-building"></i>}>
+            <FormSection title="Department Information" icon={<i className="bi bi-building"></i>} isModal={isModal}>
               <Row>
                 <Col md={6}>
                   <SelectField
@@ -215,7 +232,7 @@ const EditEmployeeForm = ({
             </FormSection>
 
             {/* Address Information Section */}
-            <FormSection title="Address Information" icon={<i className="bi bi-geo-alt"></i>}>
+            <FormSection title="Address Information" icon={<i className="bi bi-geo-alt"></i>} isModal={isModal}>
               <FormField 
                 label="Address" 
                 name="address" 
@@ -255,7 +272,7 @@ const EditEmployeeForm = ({
             </FormSection>
 
             {/* Bank Information Section */}
-            <FormSection title="Bank Information" icon={<i className="bi bi-bank"></i>}>
+            <FormSection title="Bank Information" icon={<i className="bi bi-bank"></i>} isModal={isModal}>
               <Row>
                 <Col md={6}>
                   <FormField 
@@ -306,9 +323,9 @@ const EditEmployeeForm = ({
               </Button>
             </div>
           </InformedForm>
-        </Card.Body>
-      </Card>
-    </Container>
+        </div>
+      </CardComponent>
+    </ContainerComponent>
   );
 };
 

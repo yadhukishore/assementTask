@@ -20,7 +20,7 @@ const AppContent = () => {
         <Route path="page/:page" element={<PrivateRoute element={<Home />} />} />
       </Route>
       <Route path="/employee/:id" element={<PrivateRoute element={<EmployeeDetails />} />} />
-      <Route path="/employee/edit/:id" element={<PrivateRoute element={<EditEmployee />} />} />
+      {/* <Route path="/employee/edit/:id" element={<PrivateRoute element={<EditEmployee />} />} /> */}
     </Routes>
   );
 };

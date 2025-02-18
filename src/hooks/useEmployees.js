@@ -7,9 +7,9 @@ export const useEmployees = (page, sortOrder, sortBy, pageSize = 10) => {
     () => employeeService.getEmployees({ page, sortOrder, sortBy, pageSize }),
     {
       keepPreviousData: true, 
-      revalidateOnFocus: false, // Don't revalidate when window regains focus
+      revalidateOnFocus: false, 
       revalidateOnReconnect: true,
-      errorRetryCount: 3, // Retry failed requests 3 times
+      errorRetryCount: 3, 
       dedupingInterval: 5000, 
     }
   );

@@ -40,6 +40,29 @@ const Home = () => {
     });
   };
 
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5; 
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    if (startPage > 1) pages.push(1);
+    if (startPage > 2) pages.push("...");
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < totalPages - 1) pages.push("...");
+    if (endPage < totalPages) pages.push(totalPages);
+
+    return pages;
+  };
+
   if (error) {
     return (
       <Alert variant="danger" className="m-4">
@@ -99,9 +122,19 @@ const Home = () => {
                     >
                       Previous
                     </Button>
-                    <span className="page-info">
-                      Page {currentPage} of {totalPages}
-                    </span>
+
+                    {getPageNumbers().map((page) => (
+                      <Button
+                        key={page === "..." ? `ellipsis-${page}` : page} 
+                        variant="secondary"
+                        onClick={() => page !== "..." && handlePageChange(page)}
+                        disabled={isValidating}
+                        className={`mx-1 ${page === currentPage ? 'active' : ''}`}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+
                     <Button
                       variant="secondary"
                       onClick={() => handlePageChange(currentPage + 1)}
