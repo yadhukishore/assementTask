@@ -1,5 +1,5 @@
 import React from "react";
-import { Form as InformedForm } from "informed";
+import { Form as InformedForm, RadioGroup, Radio } from "informed";
 import { Container, Row, Col, Form, Button, Card, Alert, Image, Spinner, Badge } from 'react-bootstrap';
 import { genderOptions } from "../../../../../utils/genderMapping";
 import { useMasterData } from "../../../../../hooks/useMasterData";
@@ -8,6 +8,7 @@ import SelectField from "./SelectField";
 import FormSection from "./FormSection";
 import { requiredField, validatePhone, validateJoiningDate } from "./validation";
 import { showErrorToast, showSuccessToast } from "../../../../../utils/toastMessage";
+import RadioField from "./RadioField";
 
 const EditEmployeeForm = ({
   formData,
@@ -86,12 +87,15 @@ const EditEmployeeForm = ({
             </Alert>
           )}
 
-          <InformedForm 
-            onSubmit={handleSubmit} 
-            focusOnInvalid={true}
-            initialValues={formData}
-            validateOn="change"
-          >
+        <InformedForm 
+      onSubmit={handleSubmit} 
+      focusOnInvalid={true}
+      initialValues={{
+      ...formData,
+      gender: String(formData.gender) 
+          }}
+     validateOn="change"
+    >
             {/* Profile Picture Section */}
             <FormSection title="Profile Picture" icon={<i className="bi bi-person-circle"></i>} isModal={isModal}>
               <div className="mb-4">
@@ -147,16 +151,13 @@ const EditEmployeeForm = ({
                     validate={validatePhone}
                     placeholder="+91 XXXXXXXXXX"
                   />
-                  <SelectField
+                  <RadioField
                     label="Gender"
                     name="gender"
                     options={genderOptions}
                     validate={requiredField('Gender')}
-                    valueKey="value"
-                    labelKey="label"
                   />
                 </Col>
-
                 <Col md={6}>
                   <FormField 
                     label="Date of Birth" 
