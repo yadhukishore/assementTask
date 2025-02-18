@@ -1,47 +1,25 @@
 import { useState } from "react";
-import { validateUsername, validatePassword } from "../components/login/validateLogin";
+import { showErrorToast } from "../utils/toastMessage";
 
 export const useLoginForm = (onLogin) => {
-  const [credentials, setCredentials] = useState({ username: "", password: "" });
-  const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials((prev) => ({ ...prev, [name]: value }));
-
-    let error = "";
-    if (name === "username") {
-      error = validateUsername(value);
-    } else if (name === "password") {
-      error = validatePassword(value);
+  const handleSubmit = async (formState) => {
+    const { values } = formState;
+    try {
+      await onLogin(values.username, values.password);
+    } catch (err) {
+      const errorMessage = err.message || "Login failed. Please check your credentials.";
+      setError(errorMessage);
+      showErrorToast(errorMessage);
     }
-
-    setErrors((prev) => ({ ...prev, [name]: error }));
-  };
-
-  const validateForm = () => {
-    const usernameError = validateUsername(credentials.username);
-    const passwordError = validatePassword(credentials.password);
-
-    setErrors({ username: usernameError, password: passwordError });
-
-    return !usernameError && !passwordError;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setErrors({});
-    if (!validateForm()) return;
-    onLogin(credentials.username, credentials.password, setErrors);
   };
 
   return {
-    credentials,
-    errors,
-    showPassword,
-    handleChange,
+    error,
+    setError,
     handleSubmit,
-    setShowPassword,
   };
 };
+
+export default useLoginForm;

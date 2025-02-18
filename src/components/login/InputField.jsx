@@ -1,46 +1,70 @@
-import { Form, InputGroup, Button } from "react-bootstrap";
+import React from "react";
+import { useField } from "informed";
+import { InputGroup } from "react-bootstrap";
+import { Eye, EyeOff } from "lucide-react";
 
 const InputField = ({
-  type,
+  label,
   name,
+  fieldType = "text",
+  validate,
+  required = false,
   placeholder,
-  value,
-  onChange,
-  error,
+  validateOn,
   icon,
-  showPasswordToggle,
-  onTogglePassword,
+  ...props
 }) => {
-  return (
-    <Form.Group className="mb-3">
-      <Form.Label>{placeholder}</Form.Label>
-      <InputGroup hasValidation> 
-        <InputGroup.Text className="input-icon">{icon}</InputGroup.Text>
-        <Form.Control
-          type={type}
-          name={name}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          isInvalid={!!error} 
-          className="input-field"
+  const { fieldState, fieldApi, render } = useField({
+    ...props,
+    name,
+    validate,
+    validateOn,
+  });
+
+  const { error, value } = fieldState;
+  const inputId = `${name}-input`;
+  const errorId = `${name}-error`;
+  const [showPassword, setShowPassword] = React.useState(false);
+  
+  const actualFieldType = fieldType === "password" ? (showPassword ? "text" : "password") : fieldType;
+
+  return render(
+    <div className="mb-3">
+      {label && (
+        <label htmlFor={inputId} className="form-label">
+          {label} {required && <span className="text-danger">*</span>}
+        </label>
+      )}
+      <InputGroup hasValidation>
+        {icon && <InputGroup.Text className="input-icon">{icon}</InputGroup.Text>}
+        <input
+          {...props}
+          id={inputId}
+          type={actualFieldType}
+          value={value || ""}
+          onChange={(e) => fieldApi.setValue(e.target.value)}
+          onBlur={() => fieldApi.setTouched(true)}
+          className={`form-control ${error ? "is-invalid" : ""}`}
+          placeholder={placeholder || `Enter ${label?.toLowerCase()}`}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
         />
-        {showPasswordToggle && (
-          <Button
-            variant="link"
-            onClick={onTogglePassword}
-            className="password-toggle"
+        {fieldType === "password" && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="btn btn-outline-secondary"
           >
-            {showPasswordToggle}
-          </Button>
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         )}
         {error && (
-          <Form.Control.Feedback type="invalid" tooltip>
+          <div id={errorId} className="invalid-feedback">
             {error}
-          </Form.Control.Feedback>
+          </div>
         )}
       </InputGroup>
-    </Form.Group>
+    </div>
   );
 };
 

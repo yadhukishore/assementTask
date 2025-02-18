@@ -58,11 +58,10 @@ const EditEmployeeForm = ({
       showSuccessToast("Employee details updated successfully!");
     } catch (error) {
       showErrorToast("Failed to update employee details.");
-      throw error; // Re-throw to let parent component handle
+      throw error; 
     }
   };
 
-  // Conditionally apply container styling if not in modal
   const CardComponent = isModal ? 'div' : Card;
   const ContainerComponent = isModal ? 'div' : Container;
   

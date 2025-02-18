@@ -1,66 +1,98 @@
-import { User, Lock, EyeOff, Eye } from "lucide-react";
-import { useLoginForm } from "../../../hooks/useLoginForm";
+import React, { useState } from "react";
+import { Form } from "informed";
+import { User, Lock, Loader } from "lucide-react";
 import InputField from "../InputField";
-import { Button, Form } from "react-bootstrap";
-import "./LoginForm.css"; 
+import { Button } from "react-bootstrap";
+import "./LoginForm.css";
+
+const validateUsername = (value) => {
+  if (!value) return "Username is required";
+  if (value.length < 5) return "Username must be at least 5 characters long";
+  return undefined;
+};
+
+const validatePassword = (value) => {
+  if (!value) return "Password is required";
+  if (value.length < 8) return "Password must be at least 8 characters long";
+  if (!/[A-Z]/.test(value)) return "Password must contain at least one uppercase letter";
+  if (!/[a-z]/.test(value)) return "Password must contain at least one lowercase letter";
+  if (!/[0-9]/.test(value)) return "Password must contain at least one number";
+  if (!/[@$!%*?&]/.test(value)) return "Password must contain at least one special character (@$!%*?&)";
+  return undefined;
+};
 
 const LoginForm = ({ onLogin }) => {
-  const {
-    credentials,
-    errors,
-    showPassword,
-    handleChange,
-    handleSubmit,
-    setShowPassword,
-  } = useLoginForm(onLogin);
+  const [formErrors, setFormErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (formState) => {
+    const { values } = formState;
+    
+
+    setLoading(true);
+    
+    try {
+      if (onLogin) {
+        await onLogin(values.username, values.password, setFormErrors);
+      }
+    } catch (error) {
+      setFormErrors({ general: "An unexpected error occurred" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="login-container">
+    <div className={`login-container ${loading ? 'login-loading' : ''}`}>
+      {loading && <div className="login-overlay">
+        <div className="loading-spinner-container">
+          <Loader size={40} className="loading-spinner" />
+          <p className="loading-text">Signing you in...</p>
+        </div>
+      </div>}
       <div className="login-header">
         <h2 className="login-title">Welcome Back</h2>
         <p className="login-subtitle">Please sign in to continue</p>
       </div>
 
       <div className="login-body">
-        {errors.general && (
-          <div className="alert alert-danger">{errors.general}</div>
+        {formErrors.general && (
+          <div className="alert alert-danger" role="alert">
+            {formErrors.general}
+          </div>
         )}
 
         <Form onSubmit={handleSubmit}>
           <InputField
-            type="text"
             name="username"
-            placeholder="Username"
-            value={credentials.username}
-            onChange={handleChange}
-            error={errors.username}
+            label="Username"
+            placeholder="Enter your username"
+            validate={validateUsername}
+            validateOn="change"
+            required
             icon={<User size={20} />}
+            disabled={loading}
           />
 
           <InputField
-            type={showPassword ? "text" : "password"}
             name="password"
-            placeholder="Password"
-            value={credentials.password}
-            onChange={handleChange}
-            error={errors.password}
+            label="Password"
+            fieldType="password"
+            placeholder="Enter your password"
+            validate={validatePassword}
+            validateOn="change"
+            required
             icon={<Lock size={20} />}
-            showPasswordToggle={showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            onTogglePassword={() => setShowPassword(!showPassword)}
+            disabled={loading}
           />
 
           <Button
             type="submit"
-            className="w-100 mt-3 login-button"
+            className={`w-100 mt-3 login-button ${loading ? 'login-button-loading' : ''}`}
             variant="primary"
-            disabled={
-              !!errors.username ||
-              !!errors.password ||
-              !credentials.username ||
-              !credentials.password
-            }
+            disabled={loading}
           >
-            Sign In
+            {loading ? "Processing..." : "Sign In"}
           </Button>
         </Form>
       </div>
